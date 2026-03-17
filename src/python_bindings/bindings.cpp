@@ -32,7 +32,7 @@
 #include "statistics/bind_statistics.h"
 #include "ucc/bind_ucc.h"
 #include "ucc/bind_ucc_verification.h"
-
+#include "erminer/bind_erminer.h"
 INITIALIZE_EASYLOGGINGPP
 
 namespace python_bindings {
@@ -75,7 +75,9 @@ PYBIND11_MODULE(desbordante, module, pybind11::mod_gil_not_used()) {
                            BindFastADC,
                            BindGfd,
                            BindCFDVerification,
-                           BindDDVerification}) {
+                           BindDDVerification,
+                           BindERMiner
+                        }) {
         bind_func(module);
     }
 }
