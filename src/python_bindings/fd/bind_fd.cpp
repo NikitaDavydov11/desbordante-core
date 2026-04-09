@@ -1,6 +1,7 @@
 #include "python_bindings/fd/bind_fd.h"
 
 #include <pybind11/pybind11.h>
+
 #include <pybind11/stl.h>
 
 #include "core/algorithms/fd/fd.h"
@@ -83,8 +84,7 @@ void BindFd(py::module_& main_module) {
                                          FdMine, FUN, Pyro, Tane, PFDTane>(
             fd_module, &FDAlgorithm::SortedFdList, "FdAlgorithm", "get_fds",
             {"HyFD", "Aid", "EulerFD", "Depminer", "DFD", "FastFDs", "FDep", "FdMine", "FUN",
-             kPyroName, kTaneName, kPFDTaneName},
-            pybind11::return_value_policy::copy);
+             kPyroName, kTaneName, kPFDTaneName});
 
     auto define_submodule = [&fd_algos_module, &main_module](char const* name,
                                                              std::vector<char const*> algorithms) {

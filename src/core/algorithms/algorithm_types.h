@@ -13,7 +13,6 @@ using AlgorithmTypes =
                    EGfdValidator, NaiveGfdValidator, order::Order, dd::Split, Cords, hymd::HyMD,
                    PFDVerifier, cfd_verifier::CFDVerifier, AlgoERMiner>;
 
-// clang-format off
 /* Enumeration of all supported non-pipeline algorithms. If you implement a new
  * algorithm please add its corresponding value to this enum and to the type
  * tuple above.
@@ -101,7 +100,6 @@ BETTER_ENUM(AlgorithmType, char,
 /* Sequential rules mining algorithm */
     erminer
 )
-// clang-format on
 
 static_assert(std::tuple_size_v<AlgorithmTypes> == AlgorithmType::_size(),
               "The AlgorithmTypes tuple and the AlgorithmType enum sizes must be the same. Did you "

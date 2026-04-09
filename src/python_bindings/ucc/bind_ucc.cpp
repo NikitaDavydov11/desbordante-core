@@ -1,9 +1,10 @@
 #include "python_bindings/ucc/bind_ucc.h"
 
+#include <pybind11/pybind11.h>
+
 #include <cstddef>
 #include <vector>
 
-#include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
 #include "core/algorithms/ucc/mining_algorithms.h"
@@ -63,6 +64,6 @@ void BindUcc(py::module_& main_module) {
                     }));
     BindPrimitive<HPIValid, HyUCC, PyroUCC>(
             ucc_module, py::overload_cast<>(&UCCAlgorithm::UCCList, py::const_), "UccAlgorithm",
-            "get_uccs", {"HPIValid", "HyUCC", "PyroUCC"}, pybind11::return_value_policy::copy);
+            "get_uccs", {"HPIValid", "HyUCC", "PyroUCC"});
 }
 }  // namespace python_bindings
