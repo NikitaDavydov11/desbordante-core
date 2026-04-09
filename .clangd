@@ -1,0 +1,5 @@
+CompileCommands: build/compile_commands.json
+CompileFlags:
+  Add:
+    - -isystem
+    - /opt/homebrew/include
