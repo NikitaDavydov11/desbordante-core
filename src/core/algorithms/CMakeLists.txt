@@ -17,6 +17,7 @@ set(SUBDIRS
     od/set_based_verifier
     statistics
     ucc
+    erminer
 )
 
 foreach(dir IN LISTS SUBDIRS)
@@ -65,6 +66,7 @@ target_link_libraries(
               ${DESBORDANTE_PREFIX}::ucc::pyro
               ${DESBORDANTE_PREFIX}::ucc::hpivalid
               ${DESBORDANTE_PREFIX}::ucc::verifier
+              ${DESBORDANTE_PREFIX}::erminer
 )
 
 set(NAME algos)
