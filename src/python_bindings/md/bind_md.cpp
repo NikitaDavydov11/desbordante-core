@@ -1,8 +1,9 @@
 #include "python_bindings/md/bind_md.h"
 
+#include <pybind11/pybind11.h>
+
 #include <pybind11/cast.h>
 #include <pybind11/functional.h>
-#include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/typing.h>
 
@@ -241,7 +242,6 @@ void BindMd(py::module_& main_module) {
                          .none(false))
             .doc() = R"(Defines a column match with a custom similarity measure.)";
 
-    BindPrimitive<HyMD>(md_module, &MdAlgorithm::MdList, "MdAlgorithm", "get_mds", {"HyMD"},
-                        pybind11::return_value_policy::copy);
+    BindPrimitive<HyMD>(md_module, &MdAlgorithm::MdList, "MdAlgorithm", "get_mds", {"HyMD"});
 }
 }  // namespace python_bindings
