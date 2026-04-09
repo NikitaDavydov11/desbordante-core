@@ -9,38 +9,38 @@ class Sequence;
 
 class Sequence {
 private:
-    std::vector<std::vector<int>> itemsets;
-    int id;
+    std::vector<std::vector<int>> itemsets_;
+    int id_;
 
 public:
-    explicit Sequence(int id);
+    explicit Sequence(int id_);
 
-    void addItemset(std::vector<int> const& itemset);
+    void AddItemset(std::vector<int> const& itemset);
 
-    int getId() const;
+    int GetId() const;
 
-    std::vector<std::vector<int>> const& getItemsets() const;
-    std::vector<int> const& get(int index) const;
+    std::vector<std::vector<int>> const& GetItemsets() const;
+    std::vector<int> const& Get(int index) const;
 
-    int size() const;
+    int Size() const;
 
-    std::string toString() const;
+    std::string ToString() const;
 
-    std::unique_ptr<Sequence> cloneSequenceMinusItems(
+    std::unique_ptr<Sequence> CloneSequenceMinusItems(
             std::unordered_map<int, std::unordered_set<int>> const& mapSequenceID,
             double relativeMinSup) const;
 
-    std::unique_ptr<Sequence> cloneSequenceMinusItems(
+    std::unique_ptr<Sequence> CloneSequenceMinusItems(
             double relativeMinSup,
             std::unordered_map<int, std::unordered_set<Sequence*>> const& mapSequenceID) const;
 
 private:
-    std::vector<int> cloneItemsetMinusItems(
+    std::vector<int> CloneItemsetMinusItems(
             std::vector<int> const& itemset,
             std::unordered_map<int, std::unordered_set<int>> const& mapSequenceID,
             double minSupportAbsolute) const;
 
-    std::vector<int> cloneItemsetMinusItems(
+    std::vector<int> CloneItemsetMinusItems(
             double relativeMinsup, std::vector<int> const& itemset,
             std::unordered_map<int, std::unordered_set<Sequence*>> const& mapSequenceID) const;
 };

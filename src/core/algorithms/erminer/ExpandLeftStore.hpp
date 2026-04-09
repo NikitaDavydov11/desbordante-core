@@ -13,10 +13,10 @@ public:
 
     ExpandLeftStore() = default;
 
-    void registerRule(LeftRule const& leftRule, std::vector<int> const& itemsetJ,
+    void RegisterRule(LeftRule const& leftRule, std::vector<int> const& itemsetJ,
                       std::vector<int> const& tidsJ,
-                      std::unordered_map<int, Occurence> const& occurencesJ);
+                      std::unordered_map<int, Occurrence> const& occurrencesJ);
 
 private:
-    int computeHash(std::vector<int> const& vec) const;
+    int ComputeHash(std::vector<int> const& vec) const;
 };

@@ -27,31 +27,31 @@ struct Rule {
     std::vector<int> consequent;
     int support;
     double confidence;
-    std::string toString() const;
+    std::string ToString() const;
 };
 
 class AlgoERMiner : public Algorithm {
 private:
-    long timeStart;
-    long timeEnd;
-    int ruleCount;
+    long timeStart_;
+    long timeEnd_;
+    int ruleCount_;
 
-    double minConfidence;
-    int minsuppRelative;
+    double minConfidence_;
+    int minsuppRelative_;
 
-    std::unique_ptr<SequenceDatabase> database;
+    std::unique_ptr<SequenceDatabase> database_;
 
-    std::unordered_map<int, std::unordered_map<int, Occurence>> mapItemCount;
-    std::ofstream writer;
-    ExpandLeftStore store;
-    SparseMatrix matrix;
+    std::unordered_map<int, std::unordered_map<int, Occurrence>> mapItemCount_;
+    std::ofstream writer_;
+    ExpandLeftStore store_;
+    SparseMatrix matrix_;
 
-    int maxAntecedentSize;
-    int maxConsequentSize;
-    long totalCandidateCount;
-    long candidatePrunedCount;
+    int maxAntecedentSize_;
+    int maxConsequentSize_;
+    long totalCandidateCount_;
+    long candidatePrunedCount_;
 
-    std::vector<Rule> discoveredRules;
+    std::vector<Rule> discoveredRules_;
 
     std::string input_path_;
     std::string output_path_;
@@ -67,39 +67,39 @@ public:
     void LoadDataInternal() override;
     unsigned long long ExecuteInternal() override;
 
-    void runAlgorithm(double minSupport, double minConfidence, std::string const& input,
+    void RunAlgorithm(double minSupport, double minConfidence, std::string const& input,
                       std::string const& output);
-    void runAlgorithm(std::string const& input, std::string const& output, int relativeMinsup,
+    void RunAlgorithm(std::string const& input, std::string const& output, int relativeMinsup,
                       double minConfidence);
 
-    void setMaxAntecedentSize(int size);
-    void setMaxConsequentSize(int size);
+    void SetMaxAntecedentSize(int size);
+    void SetMaxConsequentSize(int size);
 
-    void printStats() const;
+    void PrintStats() const;
 
-    std::vector<Rule> getRules() const;
+    std::vector<Rule> GetRules() const;
 
 private:
-    void calculateFrequencyOfEachItem();
-    void generateMatrix();
+    void CalculateFrequencyOfEachItem();
+    void GenerateMatrix();
 
-    void calculateTidsetsIJandJI(std::unordered_map<int, Occurence> const& occurencesI,
-                                 std::unordered_map<int, Occurence> const& occurencesJ,
+    void CalculateTidsetsIJandJi(std::unordered_map<int, Occurrence> const& occurrencesI,
+                                 std::unordered_map<int, Occurrence> const& occurrencesJ,
                                  std::vector<int>& tidsIJ, std::vector<int>& tidsJI) const;
 
-    void registerRule11(int intI, int intJ, std::vector<int> const& tidsI,
+    void RegisterRule11(int intI, int intJ, std::vector<int> const& tidsI,
                         std::vector<int> const& tidsJ, std::vector<int> const& tidsIJ,
-                        std::unordered_map<int, Occurence> const& occurencesI,
-                        std::unordered_map<int, Occurence> const& occurencesJ,
+                        std::unordered_map<int, Occurrence> const& occurrencesI,
+                        std::unordered_map<int, Occurrence> const& occurrencesJ,
                         std::unordered_map<int, LeftEquivalenceClass>& mapEclassLeft,
                         std::unordered_map<int, RightEquivalenceClass>& mapEclassRight);
 
-    void expandLeft(LeftEquivalenceClass& eclass);
-    void expandRight(RightEquivalenceClass& eclass);
-    void saveRule(std::vector<int> const& tidsIJ, double confIJ, std::vector<int> const& itemsetI,
+    void ExpandLeft(LeftEquivalenceClass& eclass);
+    void ExpandRight(RightEquivalenceClass& eclass);
+    void SaveRule(std::vector<int> const& tidsIJ, double confIJ, std::vector<int> const& itemsetI,
                   std::vector<int> const& itemsetJ);
 
-    std::vector<int> concatenate(std::vector<int> const& itemset, int item) const;
+    std::vector<int> Concatenate(std::vector<int> const& itemset, int item) const;
 };
 
 }  // namespace algos

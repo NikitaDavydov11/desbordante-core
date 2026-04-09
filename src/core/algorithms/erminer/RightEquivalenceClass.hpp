@@ -11,15 +11,15 @@ class RightEquivalenceClass {
 public:
     std::vector<int> itemsetI;
     std::vector<int> tidsI;
-    std::unordered_map<int, Occurence> occurencesI;
+    std::unordered_map<int, Occurrence> occurrencesI;
     std::list<RightRule> rules;
 
     RightEquivalenceClass(std::vector<int> itemsetI, std::vector<int> tidsI,
-                          std::unordered_map<int, Occurence> occurencesI);
+                          std::unordered_map<int, Occurrence> occurrencesI);
 
-    std::string toString() const;
+    std::string ToString() const;
 
-    bool equals(RightEquivalenceClass const& other) const;
+    bool Equals(RightEquivalenceClass const& other) const;
 
     bool operator==(RightEquivalenceClass const& other) const;
 };

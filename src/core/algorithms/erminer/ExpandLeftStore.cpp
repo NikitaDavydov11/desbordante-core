@@ -3,32 +3,33 @@
 #include <algorithm>
 #include <functional>
 
-void ExpandLeftStore::registerRule(LeftRule const& leftRule, std::vector<int> const& itemsetJ,
+void ExpandLeftStore::RegisterRule(LeftRule const& leftRule, std::vector<int> const& itemsetJ,
                                    std::vector<int> const& tidsJ,
-                                   std::unordered_map<int, Occurence> const& occurencesJ) {
+                                   std::unordered_map<int, Occurrence> const& occurrencesJ) {
     int size = static_cast<int>(itemsetJ.size());
-    int hash = computeHash(itemsetJ);
+    int hash = ComputeHash(itemsetJ);
 
-    auto& sizeMap = store[size];
-    auto& classList = sizeMap[hash];
+    auto& size_map = store[size];
+    auto& class_list = size_map[hash];
 
-    for (auto& eclass : classList) {
+    for (auto& eclass : class_list) {
         if (eclass.itemsetJ == itemsetJ) {
             eclass.rules.push_back(leftRule);
             return;
         }
     }
 
-    std::vector<int> sortedTidsJ = tidsJ;
-    std::sort(sortedTidsJ.begin(), sortedTidsJ.end());
-    sortedTidsJ.erase(std::unique(sortedTidsJ.begin(), sortedTidsJ.end()), sortedTidsJ.end());
+    std::vector<int> sorted_tids_j = tidsJ;
+    std::sort(sorted_tids_j.begin(), sorted_tids_j.end());
+    sorted_tids_j.erase(std::unique(sorted_tids_j.begin(), sorted_tids_j.end()),
+                        sorted_tids_j.end());
 
-    LeftEquivalenceClass newClass(itemsetJ, sortedTidsJ, occurencesJ);
-    newClass.rules.push_back(leftRule);
-    classList.push_back(std::move(newClass));
+    LeftEquivalenceClass new_class(itemsetJ, sorted_tids_j, occurrencesJ);
+    new_class.rules.push_back(leftRule);
+    class_list.push_back(std::move(new_class));
 }
 
-int ExpandLeftStore::computeHash(std::vector<int> const& vec) const {
+int ExpandLeftStore::ComputeHash(std::vector<int> const& vec) const {
     int hash = 1;
     for (int item : vec) {
         hash = 31 * hash + item;

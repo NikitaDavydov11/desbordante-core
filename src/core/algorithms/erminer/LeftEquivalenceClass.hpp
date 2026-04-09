@@ -10,13 +10,13 @@ class LeftEquivalenceClass {
 public:
     std::vector<int> itemsetJ;
     std::vector<int> tidsJ;
-    std::unordered_map<int, Occurence> occurencesJ;
+    std::unordered_map<int, Occurrence> occurrencesJ;
     std::list<LeftRule> rules;
 
     LeftEquivalenceClass(std::vector<int> itemsetJ, std::vector<int> tidsJ,
-                         std::unordered_map<int, Occurence> occurencesJ);
+                         std::unordered_map<int, Occurrence> occurrencesJ);
 
-    std::string toString() const;
-    bool equals(LeftEquivalenceClass const& other) const;
+    std::string ToString() const;
+    bool Equals(LeftEquivalenceClass const& other) const;
     bool operator==(LeftEquivalenceClass const& other) const;
 };

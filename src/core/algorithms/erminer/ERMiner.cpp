@@ -18,16 +18,16 @@ namespace algos {
 
 AlgoERMiner::AlgoERMiner()
     : Algorithm({}),
-      timeStart(0),
-      timeEnd(0),
-      ruleCount(0),
-      minConfidence(0),
-      minsuppRelative(0),
-      database(std::make_unique<SequenceDatabase>()),
-      maxAntecedentSize(INT_MAX),
-      maxConsequentSize(INT_MAX),
-      totalCandidateCount(0),
-      candidatePrunedCount(0),
+      timeStart_(0),
+      timeEnd_(0),
+      ruleCount_(0),
+      minConfidence_(0),
+      minsuppRelative_(0),
+      database_(std::make_unique<SequenceDatabase>()),
+      maxAntecedentSize_(INT_MAX),
+      maxConsequentSize_(INT_MAX),
+      totalCandidateCount_(0),
+      candidatePrunedCount_(0),
       min_support_(0),
       min_confidence_(0) {
     RegisterOptions();
@@ -68,30 +68,30 @@ void AlgoERMiner::RegisterOptions() {
 }
 
 void AlgoERMiner::LoadDataInternal() {
-    database->loadFile(input_path_);
+    database_->LoadFile(input_path_);
 }
 
 void AlgoERMiner::ResetState() {
-    ruleCount = 0;
-    totalCandidateCount = 0;
-    candidatePrunedCount = 0;
-    mapItemCount.clear();
-    database.reset(new SequenceDatabase());
-    matrix = SparseMatrix();
-    store = ExpandLeftStore();
-    discoveredRules.clear();
+    ruleCount_ = 0;
+    totalCandidateCount_ = 0;
+    candidatePrunedCount_ = 0;
+    mapItemCount_.clear();
+    database_.reset(new SequenceDatabase());
+    matrix_ = SparseMatrix();
+    store_ = ExpandLeftStore();
+    discoveredRules_.clear();
 }
 
 unsigned long long AlgoERMiner::ExecuteInternal() {
     auto start = std::chrono::high_resolution_clock::now();
 
-    runAlgorithm(min_support_, min_confidence_, input_path_, output_path_);
+    RunAlgorithm(min_support_, min_confidence_, input_path_, output_path_);
 
     auto end = std::chrono::high_resolution_clock::now();
     return std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 }
 
-std::string Rule::toString() const {
+std::string Rule::ToString() const {
     std::stringstream ss;
 
     ss << "[";
@@ -116,215 +116,216 @@ std::string Rule::toString() const {
     return ss.str();
 }
 
-void AlgoERMiner::runAlgorithm(double minSupport, double minConfidence, std::string const& input,
+void AlgoERMiner::RunAlgorithm(double minSupport, double minConfidence, std::string const& input,
                                std::string const& output) {
     try {
-        database = std::make_unique<SequenceDatabase>();
-        database->loadFile(input);
+        database_ = std::make_unique<SequenceDatabase>();
+        database_->LoadFile(input);
     } catch (std::exception const& e) {
         std::cerr << "Error loading database: " << e.what() << std::endl;
         return;
     }
 
-    this->minsuppRelative = static_cast<int>(std::ceil(minSupport * database->size()));
-    runAlgorithm(input, output, minsuppRelative, minConfidence);
+    this->minsuppRelative_ = static_cast<int>(std::ceil(minSupport * database_->Size()));
+    RunAlgorithm(input, output, minsuppRelative_, minConfidence);
 }
 
-void AlgoERMiner::runAlgorithm(std::string const& input, std::string const& output,
+void AlgoERMiner::RunAlgorithm(std::string const& input, std::string const& output,
                                int relativeMinsup, double minConfidence) {
-    this->minConfidence = minConfidence;
-    ruleCount = 0;
+    this->minConfidence_ = minConfidence;
+    ruleCount_ = 0;
 
-    if (!database) {
+    if (!database_) {
         try {
-            database = std::make_unique<SequenceDatabase>();
-            database->loadFile(input);
+            database_ = std::make_unique<SequenceDatabase>();
+            database_->LoadFile(input);
         } catch (std::exception const& e) {
             std::cerr << "Error loading database: " << e.what() << std::endl;
             return;
         }
     }
 
-    writer.open(output);
-    if (!writer.is_open()) {
+    writer_.open(output);
+    if (!writer_.is_open()) {
         std::cerr << "Cannot open output file: " << output << std::endl;
         return;
     }
 
-    this->minsuppRelative = relativeMinsup;
-    if (this->minsuppRelative == 0) {
-        this->minsuppRelative = 1;
+    this->minsuppRelative_ = relativeMinsup;
+    if (this->minsuppRelative_ == 0) {
+        this->minsuppRelative_ = 1;
     }
 
-    timeStart = std::chrono::duration_cast<std::chrono::milliseconds>(
-                        std::chrono::system_clock::now().time_since_epoch())
-                        .count();
+    timeStart_ = std::chrono::duration_cast<std::chrono::milliseconds>(
+                         std::chrono::system_clock::now().time_since_epoch())
+                         .count();
 
-    if (maxAntecedentSize > 0 && maxConsequentSize > 0) {
-        calculateFrequencyOfEachItem();
-        generateMatrix();
+    if (maxAntecedentSize_ > 0 && maxConsequentSize_ > 0) {
+        CalculateFrequencyOfEachItem();
+        GenerateMatrix();
     }
 
-    std::unordered_map<int, LeftEquivalenceClass> mapEclassLeft;
-    std::unordered_map<int, RightEquivalenceClass> mapEclassRight;
+    std::unordered_map<int, LeftEquivalenceClass> map_eclass_left;
+    std::unordered_map<int, RightEquivalenceClass> map_eclass_right;
 
-    for (auto const& entry : matrix.matrix) {
-        int intI = entry.first;
-        auto const& occurencesI = mapItemCount[intI];
+    for (auto const& entry : matrix_.matrix) {
+        int int_i = entry.first;
+        auto const& occurrences_i = mapItemCount_[int_i];
 
-        if (occurencesI.size() < static_cast<size_t>(minsuppRelative)) {
+        if (occurrences_i.size() < static_cast<size_t>(minsuppRelative_)) {
             continue;
         }
 
-        std::vector<int> tidsI;
-        for (auto const& occ : occurencesI) {
-            tidsI.push_back(occ.first);
+        std::vector<int> tids_i;
+        for (auto const& occ : occurrences_i) {
+            tids_i.push_back(occ.first);
         }
-        std::sort(tidsI.begin(), tidsI.end());
+        std::sort(tids_i.begin(), tids_i.end());
 
-        for (auto const& entryJ : entry.second) {
-            int intJ = entryJ.first;
-            int supportIJ = entryJ.second;
+        for (auto const& entry_j : entry.second) {
+            int int_j = entry_j.first;
+            int support_ij = entry_j.second;
 
-            if (supportIJ < minsuppRelative) {
+            if (support_ij < minsuppRelative_) {
                 continue;
             }
 
-            auto const& occurencesJ = mapItemCount[intJ];
+            auto const& occurrences_j = mapItemCount_[int_j];
 
-            if (occurencesJ.size() < static_cast<size_t>(minsuppRelative)) {
+            if (occurrences_j.size() < static_cast<size_t>(minsuppRelative_)) {
                 continue;
             }
 
-            std::vector<int> tidsJ;
-            for (auto const& occ : occurencesJ) {
-                tidsJ.push_back(occ.first);
+            std::vector<int> tids_j;
+            for (auto const& occ : occurrences_j) {
+                tids_j.push_back(occ.first);
             }
-            std::sort(tidsJ.begin(), tidsJ.end());
+            std::sort(tids_j.begin(), tids_j.end());
 
-            std::vector<int> tidsIJ;
-            std::vector<int> tidsJI;
+            std::vector<int> tids_ij;
+            std::vector<int> tids_ji;
 
-            calculateTidsetsIJandJI(occurencesI, occurencesJ, tidsIJ, tidsJI);
+            CalculateTidsetsIJandJi(occurrences_i, occurrences_j, tids_ij, tids_ji);
 
-            if (tidsIJ.size() >= static_cast<size_t>(minsuppRelative)) {
-                double confIJ = static_cast<double>(tidsIJ.size()) / occurencesI.size();
-                std::vector<int> itemsetI = {intI};
-                std::vector<int> itemsetJ = {intJ};
+            if (tids_ij.size() >= static_cast<size_t>(minsuppRelative_)) {
+                double conf_ij = static_cast<double>(tids_ij.size()) / occurrences_i.size();
+                std::vector<int> itemset_i = {int_i};
+                std::vector<int> itemset_j = {int_j};
 
-                if (confIJ >= minConfidence) {
-                    saveRule(tidsIJ, confIJ, itemsetI, itemsetJ);
+                if (conf_ij >= minConfidence) {
+                    SaveRule(tids_ij, conf_ij, itemset_i, itemset_j);
                 }
 
-                if (maxAntecedentSize > 1 || maxConsequentSize > 1) {
-                    registerRule11(intI, intJ, tidsI, tidsJ, tidsIJ, occurencesI, occurencesJ,
-                                   mapEclassLeft, mapEclassRight);
+                if (maxAntecedentSize_ > 1 || maxConsequentSize_ > 1) {
+                    RegisterRule11(int_i, int_j, tids_i, tids_j, tids_ij, occurrences_i,
+                                   occurrences_j, map_eclass_left, map_eclass_right);
                 }
             }
 
-            if (tidsJI.size() >= static_cast<size_t>(minsuppRelative)) {
-                double confJI = static_cast<double>(tidsJI.size()) / occurencesJ.size();
-                std::vector<int> itemsetI = {intI};
-                std::vector<int> itemsetJ = {intJ};
+            if (tids_ji.size() >= static_cast<size_t>(minsuppRelative_)) {
+                double conf_ji = static_cast<double>(tids_ji.size()) / occurrences_j.size();
+                std::vector<int> itemset_i = {int_i};
+                std::vector<int> itemset_j = {int_j};
 
-                if (confJI >= minConfidence) {
-                    saveRule(tidsJI, confJI, itemsetJ, itemsetI);
+                if (conf_ji >= minConfidence) {
+                    SaveRule(tids_ji, conf_ji, itemset_j, itemset_i);
                 }
 
-                if (maxAntecedentSize > 1 || maxConsequentSize > 1) {
-                    registerRule11(intJ, intI, tidsJ, tidsI, tidsJI, occurencesJ, occurencesI,
-                                   mapEclassLeft, mapEclassRight);
+                if (maxAntecedentSize_ > 1 || maxConsequentSize_ > 1) {
+                    RegisterRule11(int_j, int_i, tids_j, tids_i, tids_ji, occurrences_j,
+                                   occurrences_i, map_eclass_left, map_eclass_right);
                 }
             }
         }
     }
 
-    if (maxAntecedentSize > 1) {
-        for (auto& eclassLeftPair : mapEclassLeft) {
-            auto& eclassLeft = eclassLeftPair.second;
-            if (eclassLeft.rules.size() > 1) {
-                std::vector<LeftRule> rulesVec(eclassLeft.rules.begin(), eclassLeft.rules.end());
-                std::sort(rulesVec.begin(), rulesVec.end(),
+    if (maxAntecedentSize_ > 1) {
+        for (auto& eclass_left_pair : map_eclass_left) {
+            auto& eclass_left = eclass_left_pair.second;
+            if (eclass_left.rules.size() > 1) {
+                std::vector<LeftRule> rules_vec(eclass_left.rules.begin(), eclass_left.rules.end());
+                std::sort(rules_vec.begin(), rules_vec.end(),
                           [](LeftRule const& a, LeftRule const& b) {
                               return a.itemsetI[0] < b.itemsetI[0];
                           });
 
-                eclassLeft.rules.assign(rulesVec.begin(), rulesVec.end());
-                expandLeft(eclassLeft);
+                eclass_left.rules.assign(rules_vec.begin(), rules_vec.end());
+                ExpandLeft(eclass_left);
             }
         }
     }
 
-    if (maxConsequentSize > 1) {
-        for (auto& eclassRightPair : mapEclassRight) {
-            auto& eclassRight = eclassRightPair.second;
-            if (eclassRight.rules.size() > 1) {
-                std::vector<RightRule> rulesVec(eclassRight.rules.begin(), eclassRight.rules.end());
-                std::sort(rulesVec.begin(), rulesVec.end(),
+    if (maxConsequentSize_ > 1) {
+        for (auto& eclass_right_pair : map_eclass_right) {
+            auto& eclass_right = eclass_right_pair.second;
+            if (eclass_right.rules.size() > 1) {
+                std::vector<RightRule> rules_vec(eclass_right.rules.begin(),
+                                                 eclass_right.rules.end());
+                std::sort(rules_vec.begin(), rules_vec.end(),
                           [](RightRule const& a, RightRule const& b) {
                               return a.itemsetJ[0] < b.itemsetJ[0];
                           });
 
-                eclassRight.rules.assign(rulesVec.begin(), rulesVec.end());
-                expandRight(eclassRight);
+                eclass_right.rules.assign(rules_vec.begin(), rules_vec.end());
+                ExpandRight(eclass_right);
             }
         }
     }
 
-    for (auto& sizeMap : store.store) {
-        for (auto& hashListPair : sizeMap.second) {
-            for (auto& eclass : hashListPair.second) {
+    for (auto& size_map : store_.store) {
+        for (auto& hash_list_pair : size_map.second) {
+            for (auto& eclass : hash_list_pair.second) {
                 if (eclass.rules.size() > 1) {
-                    std::vector<LeftRule> rulesVec(eclass.rules.begin(), eclass.rules.end());
-                    std::sort(rulesVec.begin(), rulesVec.end(),
+                    std::vector<LeftRule> rules_vec(eclass.rules.begin(), eclass.rules.end());
+                    std::sort(rules_vec.begin(), rules_vec.end(),
                               [](LeftRule const& a, LeftRule const& b) {
                                   return a.itemsetI.back() < b.itemsetI.back();
                               });
 
-                    eclass.rules.assign(rulesVec.begin(), rulesVec.end());
-                    expandLeft(eclass);
+                    eclass.rules.assign(rules_vec.begin(), rules_vec.end());
+                    ExpandLeft(eclass);
                 }
             }
         }
     }
 
-    timeEnd = std::chrono::duration_cast<std::chrono::milliseconds>(
-                      std::chrono::system_clock::now().time_since_epoch())
-                      .count();
+    timeEnd_ = std::chrono::duration_cast<std::chrono::milliseconds>(
+                       std::chrono::system_clock::now().time_since_epoch())
+                       .count();
 
-    writer.close();
-    database.reset();
+    writer_.close();
+    database_.reset();
 }
 
-void AlgoERMiner::calculateTidsetsIJandJI(std::unordered_map<int, Occurence> const& occurencesI,
-                                          std::unordered_map<int, Occurence> const& occurencesJ,
+void AlgoERMiner::CalculateTidsetsIJandJi(std::unordered_map<int, Occurrence> const& occurrencesI,
+                                          std::unordered_map<int, Occurrence> const& occurrencesJ,
                                           std::vector<int>& tidsIJ,
                                           std::vector<int>& tidsJI) const {
-    std::vector<int> commonTids;
-    if (occurencesI.size() < occurencesJ.size()) {
-        for (auto const& entryOccI : occurencesI) {
-            int tid = entryOccI.first;
-            if (occurencesJ.find(tid) != occurencesJ.end()) {
-                commonTids.push_back(tid);
+    std::vector<int> common_tids;
+    if (occurrencesI.size() < occurrencesJ.size()) {
+        for (auto const& entry_occ_i : occurrencesI) {
+            int tid = entry_occ_i.first;
+            if (occurrencesJ.find(tid) != occurrencesJ.end()) {
+                common_tids.push_back(tid);
             }
         }
     } else {
-        for (auto const& entryOccJ : occurencesJ) {
-            int tid = entryOccJ.first;
-            if (occurencesI.find(tid) != occurencesI.end()) {
-                commonTids.push_back(tid);
+        for (auto const& entry_occ_j : occurrencesJ) {
+            int tid = entry_occ_j.first;
+            if (occurrencesI.find(tid) != occurrencesI.end()) {
+                common_tids.push_back(tid);
             }
         }
     }
 
-    for (int tid : commonTids) {
-        Occurence const& occI = occurencesI.at(tid);
-        Occurence const& occJ = occurencesJ.at(tid);
+    for (int tid : common_tids) {
+        Occurrence const& occ_i = occurrencesI.at(tid);
+        Occurrence const& occ_j = occurrencesJ.at(tid);
 
-        if (occI.firstItemset < occJ.lastItemset) {
+        if (occ_i.firstItemset < occ_j.lastItemset) {
             tidsIJ.push_back(tid);
         }
-        if (occJ.firstItemset < occI.lastItemset) {
+        if (occ_j.firstItemset < occ_i.lastItemset) {
             tidsJI.push_back(tid);
         }
     }
@@ -336,21 +337,21 @@ void AlgoERMiner::calculateTidsetsIJandJI(std::unordered_map<int, Occurence> con
     tidsJI.erase(std::unique(tidsJI.begin(), tidsJI.end()), tidsJI.end());
 }
 
-void AlgoERMiner::calculateFrequencyOfEachItem() {
-    mapItemCount.clear();
+void AlgoERMiner::CalculateFrequencyOfEachItem() {
+    mapItemCount_.clear();
 
-    for (size_t k = 0; k < database->getSequences().size(); k++) {
-        auto const& sequence = database->getSequences()[k];
+    for (size_t k = 0; k < database_->GetSequences().size(); k++) {
+        auto const& sequence = database_->GetSequences()[k];
 
-        for (int j = 0; j < sequence->size(); j++) {
-            auto const& itemset = sequence->get(j);
+        for (int j = 0; j < sequence->Size(); j++) {
+            auto const& itemset = sequence->Get(j);
 
-            for (int itemI : itemset) {
-                auto& occurences = mapItemCount[itemI];
-                auto it = occurences.find(k);
-                if (it == occurences.end()) {
-                    Occurence occ(static_cast<int16_t>(j), static_cast<int16_t>(j));
-                    occurences.emplace(k, occ);
+            for (int item_i : itemset) {
+                auto& occurrences = mapItemCount_[item_i];
+                auto it = occurrences.find(k);
+                if (it == occurrences.end()) {
+                    Occurrence occ(static_cast<int16_t>(j), static_cast<int16_t>(j));
+                    occurrences.emplace(k, occ);
                 } else {
                     it->second.lastItemset = static_cast<int16_t>(j);
                 }
@@ -359,318 +360,321 @@ void AlgoERMiner::calculateFrequencyOfEachItem() {
     }
 }
 
-void AlgoERMiner::registerRule11(int intI, int intJ, std::vector<int> const& tidsI,
+void AlgoERMiner::RegisterRule11(int intI, int intJ, std::vector<int> const& tidsI,
                                  std::vector<int> const& tidsJ, std::vector<int> const& tidsIJ,
-                                 std::unordered_map<int, Occurence> const& occurencesI,
-                                 std::unordered_map<int, Occurence> const& occurencesJ,
+                                 std::unordered_map<int, Occurrence> const& occurrencesI,
+                                 std::unordered_map<int, Occurrence> const& occurrencesJ,
                                  std::unordered_map<int, LeftEquivalenceClass>& mapEclassLeft,
                                  std::unordered_map<int, RightEquivalenceClass>& mapEclassRight) {
-    auto leftIt = mapEclassLeft.find(intJ);
-    if (leftIt == mapEclassLeft.end()) {
-        mapEclassLeft.emplace(intJ, LeftEquivalenceClass({intJ}, tidsJ, occurencesJ));
-        leftIt = mapEclassLeft.find(intJ);
+    auto left_it = mapEclassLeft.find(intJ);
+    if (left_it == mapEclassLeft.end()) {
+        mapEclassLeft.emplace(intJ, LeftEquivalenceClass({intJ}, tidsJ, occurrencesJ));
+        left_it = mapEclassLeft.find(intJ);
     }
-    leftIt->second.rules.emplace_back(std::vector<int>{intI}, tidsI, tidsIJ);
+    left_it->second.rules.emplace_back(std::vector<int>{intI}, tidsI, tidsIJ);
 
-    auto rightIt = mapEclassRight.find(intI);
-    if (rightIt == mapEclassRight.end()) {
-        mapEclassRight.emplace(intI, RightEquivalenceClass({intI}, tidsI, occurencesI));
-        rightIt = mapEclassRight.find(intI);
+    auto right_it = mapEclassRight.find(intI);
+    if (right_it == mapEclassRight.end()) {
+        mapEclassRight.emplace(intI, RightEquivalenceClass({intI}, tidsI, occurrencesI));
+        right_it = mapEclassRight.find(intI);
     }
-    rightIt->second.rules.emplace_back(std::vector<int>{intJ}, tidsJ, tidsIJ, occurencesJ);
+    right_it->second.rules.emplace_back(std::vector<int>{intJ}, tidsJ, tidsIJ, occurrencesJ);
 }
 
-std::vector<int> AlgoERMiner::concatenate(std::vector<int> const& itemset, int item) const {
-    std::vector<int> newItemset = itemset;
-    newItemset.push_back(item);
-    return newItemset;
+std::vector<int> AlgoERMiner::Concatenate(std::vector<int> const& itemset, int item) const {
+    std::vector<int> new_itemset = itemset;
+    new_itemset.push_back(item);
+    return new_itemset;
 }
 
-void AlgoERMiner::expandLeft(LeftEquivalenceClass& eclass) {
-    std::vector<LeftRule> rulesVec(eclass.rules.begin(), eclass.rules.end());
+void AlgoERMiner::ExpandLeft(LeftEquivalenceClass& eclass) {
+    std::vector<LeftRule> rules_vec(eclass.rules.begin(), eclass.rules.end());
 
-    for (size_t w = 0; w < rulesVec.size() - 1; w++) {
-        LeftRule& rule1 = rulesVec[w];
+    for (size_t w = 0; w < rules_vec.size() - 1; w++) {
+        LeftRule& rule1 = rules_vec[w];
         int d = rule1.itemsetI.back();
 
-        LeftEquivalenceClass rulesForRecursion(eclass.itemsetJ, eclass.tidsJ, eclass.occurencesJ);
+        LeftEquivalenceClass rules_for_recursion(eclass.itemsetJ, eclass.tidsJ,
+                                                 eclass.occurrencesJ);
 
-        for (size_t m = w + 1; m < rulesVec.size(); m++) {
-            LeftRule& rule2 = rulesVec[m];
+        for (size_t m = w + 1; m < rules_vec.size(); m++) {
+            LeftRule& rule2 = rules_vec[m];
             int c = rule2.itemsetI.back();
 
-            if (matrix.getCount(c, d) < minsuppRelative) {
-                candidatePrunedCount++;
-                totalCandidateCount++;
+            if (matrix_.GetCount(c, d) < minsuppRelative_) {
+                candidatePrunedCount_++;
+                totalCandidateCount_++;
                 continue;
             }
-            totalCandidateCount++;
+            totalCandidateCount_++;
 
-            std::vector<int> tidsIC;
-            auto const& mapC = mapItemCount[c];
+            std::vector<int> tids_ic;
+            auto const& map_c = mapItemCount_[c];
 
-            std::vector<int> const& sortedTidsI = rule1.tidsI;
+            std::vector<int> const& sorted_tids_i = rule1.tidsI;
 
-            if (sortedTidsI.size() < mapC.size()) {
-                int remains = static_cast<int>(sortedTidsI.size());
-                for (int tid : sortedTidsI) {
-                    if (mapC.find(tid) != mapC.end()) {
-                        tidsIC.push_back(tid);
+            if (sorted_tids_i.size() < map_c.size()) {
+                int remains = static_cast<int>(sorted_tids_i.size());
+                for (int tid : sorted_tids_i) {
+                    if (map_c.find(tid) != map_c.end()) {
+                        tids_ic.push_back(tid);
                     }
                     remains--;
-                    if (tidsIC.size() + static_cast<size_t>(remains) <
-                        static_cast<size_t>(minsuppRelative)) {
+                    if (tids_ic.size() + static_cast<size_t>(remains) <
+                        static_cast<size_t>(minsuppRelative_)) {
                         break;
                     }
                 }
             } else {
-                int remains = static_cast<int>(mapC.size());
-                for (auto const& entry : mapC) {
+                int remains = static_cast<int>(map_c.size());
+                for (auto const& entry : map_c) {
                     int tid = entry.first;
-                    if (std::binary_search(sortedTidsI.begin(), sortedTidsI.end(), tid)) {
-                        tidsIC.push_back(tid);
+                    if (std::binary_search(sorted_tids_i.begin(), sorted_tids_i.end(), tid)) {
+                        tids_ic.push_back(tid);
                     }
                     remains--;
-                    if (tidsIC.size() + static_cast<size_t>(remains) <
-                        static_cast<size_t>(minsuppRelative)) {
+                    if (tids_ic.size() + static_cast<size_t>(remains) <
+                        static_cast<size_t>(minsuppRelative_)) {
                         break;
                     }
                 }
             }
 
-            std::sort(tidsIC.begin(), tidsIC.end());
-            tidsIC.erase(std::unique(tidsIC.begin(), tidsIC.end()), tidsIC.end());
+            std::sort(tids_ic.begin(), tids_ic.end());
+            tids_ic.erase(std::unique(tids_ic.begin(), tids_ic.end()), tids_ic.end());
 
-            std::vector<int> tidsIC_J;
-            std::vector<int> const& sortedTidsIJ = rule1.tidsIJ;
+            std::vector<int> tids_ic_j;
+            std::vector<int> const& sorted_tids_ij = rule1.tidsIJ;
 
-            if (sortedTidsIJ.size() < mapC.size()) {
-                for (int tid : sortedTidsIJ) {
-                    auto occurenceCIt = mapC.find(tid);
-                    if (occurenceCIt != mapC.end()) {
-                        auto occurenceJIt = eclass.occurencesJ.find(tid);
-                        if (occurenceJIt != eclass.occurencesJ.end()) {
-                            if (occurenceCIt->second.firstItemset <
-                                occurenceJIt->second.lastItemset) {
-                                tidsIC_J.push_back(tid);
+            if (sorted_tids_ij.size() < map_c.size()) {
+                for (int tid : sorted_tids_ij) {
+                    auto occurrence_c_it = map_c.find(tid);
+                    if (occurrence_c_it != map_c.end()) {
+                        auto occurrence_j_it = eclass.occurrencesJ.find(tid);
+                        if (occurrence_j_it != eclass.occurrencesJ.end()) {
+                            if (occurrence_c_it->second.firstItemset <
+                                occurrence_j_it->second.lastItemset) {
+                                tids_ic_j.push_back(tid);
                             }
                         }
                     }
                 }
             } else {
-                for (auto const& entryC : mapC) {
-                    int tid = entryC.first;
-                    if (std::binary_search(sortedTidsIJ.begin(), sortedTidsIJ.end(), tid)) {
-                        auto occurenceJIt = eclass.occurencesJ.find(tid);
-                        if (occurenceJIt != eclass.occurencesJ.end()) {
-                            if (entryC.second.firstItemset < occurenceJIt->second.lastItemset) {
-                                tidsIC_J.push_back(tid);
+                for (auto const& entry_c : map_c) {
+                    int tid = entry_c.first;
+                    if (std::binary_search(sorted_tids_ij.begin(), sorted_tids_ij.end(), tid)) {
+                        auto occurrence_j_it = eclass.occurrencesJ.find(tid);
+                        if (occurrence_j_it != eclass.occurrencesJ.end()) {
+                            if (entry_c.second.firstItemset < occurrence_j_it->second.lastItemset) {
+                                tids_ic_j.push_back(tid);
                             }
                         }
                     }
                 }
             }
 
-            std::sort(tidsIC_J.begin(), tidsIC_J.end());
-            tidsIC_J.erase(std::unique(tidsIC_J.begin(), tidsIC_J.end()), tidsIC_J.end());
+            std::sort(tids_ic_j.begin(), tids_ic_j.end());
+            tids_ic_j.erase(std::unique(tids_ic_j.begin(), tids_ic_j.end()), tids_ic_j.end());
 
-            if (tidsIC_J.size() >= static_cast<size_t>(minsuppRelative)) {
-                double confIC_J = static_cast<double>(tidsIC_J.size()) / tidsIC.size();
-                std::vector<int> itemsetIC = concatenate(rule1.itemsetI, c);
+            if (tids_ic_j.size() >= static_cast<size_t>(minsuppRelative_)) {
+                double conf_ic_j = static_cast<double>(tids_ic_j.size()) / tids_ic.size();
+                std::vector<int> itemset_ic = Concatenate(rule1.itemsetI, c);
 
-                if (confIC_J >= minConfidence) {
-                    saveRule(tidsIC_J, confIC_J, itemsetIC, eclass.itemsetJ);
+                if (conf_ic_j >= minConfidence_) {
+                    SaveRule(tids_ic_j, conf_ic_j, itemset_ic, eclass.itemsetJ);
                 }
 
-                if (static_cast<int>(itemsetIC.size()) < maxAntecedentSize) {
-                    rulesForRecursion.rules.emplace_back(itemsetIC, tidsIC, tidsIC_J);
+                if (static_cast<int>(itemset_ic.size()) < maxAntecedentSize_) {
+                    rules_for_recursion.rules.emplace_back(itemset_ic, tids_ic, tids_ic_j);
                 }
             }
         }
 
-        if (rulesForRecursion.rules.size() > 1) {
-            expandLeft(rulesForRecursion);
+        if (rules_for_recursion.rules.size() > 1) {
+            ExpandLeft(rules_for_recursion);
         }
     }
 }
 
-void AlgoERMiner::expandRight(RightEquivalenceClass& eclass) {
-    std::vector<RightRule> rulesVec(eclass.rules.begin(), eclass.rules.end());
+void AlgoERMiner::ExpandRight(RightEquivalenceClass& eclass) {
+    std::vector<RightRule> rules_vec(eclass.rules.begin(), eclass.rules.end());
 
-    for (size_t w = 0; w < rulesVec.size() - 1; w++) {
-        RightRule& rule1 = rulesVec[w];
+    for (size_t w = 0; w < rules_vec.size() - 1; w++) {
+        RightRule& rule1 = rules_vec[w];
         int d = rule1.itemsetJ.back();
 
-        RightEquivalenceClass rulesForRecursion(eclass.itemsetI, eclass.tidsI, eclass.occurencesI);
+        RightEquivalenceClass rules_for_recursion(eclass.itemsetI, eclass.tidsI,
+                                                  eclass.occurrencesI);
 
-        for (size_t m = w + 1; m < rulesVec.size(); m++) {
-            RightRule& rule2 = rulesVec[m];
+        for (size_t m = w + 1; m < rules_vec.size(); m++) {
+            RightRule& rule2 = rules_vec[m];
             int c = rule2.itemsetJ.back();
 
-            if (matrix.getCount(c, d) < minsuppRelative) {
-                candidatePrunedCount++;
-                totalCandidateCount++;
+            if (matrix_.GetCount(c, d) < minsuppRelative_) {
+                candidatePrunedCount_++;
+                totalCandidateCount_++;
                 continue;
             }
-            totalCandidateCount++;
+            totalCandidateCount_++;
 
-            std::vector<int> tidsI_JC;
-            auto const& mapC = mapItemCount[c];
+            std::vector<int> tids_i_jc;
+            auto const& map_c = mapItemCount_[c];
 
-            std::vector<int> const& sortedTidsIJ = rule1.tidsIJ;
+            std::vector<int> const& sorted_tids_ij = rule1.tidsIJ;
 
-            if (sortedTidsIJ.size() < mapC.size()) {
-                int remains = static_cast<int>(sortedTidsIJ.size());
-                for (int tid : sortedTidsIJ) {
-                    auto occurenceCIt = mapC.find(tid);
-                    if (occurenceCIt != mapC.end()) {
-                        auto occurenceIIt = eclass.occurencesI.find(tid);
-                        if (occurenceIIt != eclass.occurencesI.end()) {
-                            if (occurenceCIt->second.lastItemset >
-                                occurenceIIt->second.firstItemset) {
-                                tidsI_JC.push_back(tid);
+            if (sorted_tids_ij.size() < map_c.size()) {
+                int remains = static_cast<int>(sorted_tids_ij.size());
+                for (int tid : sorted_tids_ij) {
+                    auto occurrence_c_it = map_c.find(tid);
+                    if (occurrence_c_it != map_c.end()) {
+                        auto occurrence_i_it = eclass.occurrencesI.find(tid);
+                        if (occurrence_i_it != eclass.occurrencesI.end()) {
+                            if (occurrence_c_it->second.lastItemset >
+                                occurrence_i_it->second.firstItemset) {
+                                tids_i_jc.push_back(tid);
                             }
                         }
                     }
                     remains--;
-                    if (tidsI_JC.size() + static_cast<size_t>(remains) <
-                        static_cast<size_t>(minsuppRelative)) {
+                    if (tids_i_jc.size() + static_cast<size_t>(remains) <
+                        static_cast<size_t>(minsuppRelative_)) {
                         break;
                     }
                 }
             } else {
-                int remains = static_cast<int>(mapC.size());
-                for (auto const& entryC : mapC) {
-                    int tid = entryC.first;
-                    if (std::binary_search(sortedTidsIJ.begin(), sortedTidsIJ.end(), tid)) {
-                        auto occurenceIIt = eclass.occurencesI.find(tid);
-                        if (occurenceIIt != eclass.occurencesI.end()) {
-                            if (entryC.second.lastItemset > occurenceIIt->second.firstItemset) {
-                                tidsI_JC.push_back(tid);
+                int remains = static_cast<int>(map_c.size());
+                for (auto const& entry_c : map_c) {
+                    int tid = entry_c.first;
+                    if (std::binary_search(sorted_tids_ij.begin(), sorted_tids_ij.end(), tid)) {
+                        auto occurrence_i_it = eclass.occurrencesI.find(tid);
+                        if (occurrence_i_it != eclass.occurrencesI.end()) {
+                            if (entry_c.second.lastItemset > occurrence_i_it->second.firstItemset) {
+                                tids_i_jc.push_back(tid);
                             }
                         }
                     }
                     remains--;
-                    if (tidsI_JC.size() + static_cast<size_t>(remains) <
-                        static_cast<size_t>(minsuppRelative)) {
+                    if (tids_i_jc.size() + static_cast<size_t>(remains) <
+                        static_cast<size_t>(minsuppRelative_)) {
                         break;
                     }
                 }
             }
 
-            std::sort(tidsI_JC.begin(), tidsI_JC.end());
-            tidsI_JC.erase(std::unique(tidsI_JC.begin(), tidsI_JC.end()), tidsI_JC.end());
+            std::sort(tids_i_jc.begin(), tids_i_jc.end());
+            tids_i_jc.erase(std::unique(tids_i_jc.begin(), tids_i_jc.end()), tids_i_jc.end());
 
-            if (tidsI_JC.size() >= static_cast<size_t>(minsuppRelative)) {
-                std::vector<int> tidsJC;
-                std::unordered_map<int, Occurence> occurencesJC;
+            if (tids_i_jc.size() >= static_cast<size_t>(minsuppRelative_)) {
+                std::vector<int> tids_jc;
+                std::unordered_map<int, Occurrence> occurrences_jc;
 
-                std::vector<int> const& sortedTidsJ = rule1.tidsJ;
+                std::vector<int> const& sorted_tids_j = rule1.tidsJ;
 
-                if (sortedTidsJ.size() < mapC.size()) {
-                    for (int tid : sortedTidsJ) {
-                        auto occurrenceCIt = mapC.find(tid);
-                        if (occurrenceCIt != mapC.end()) {
-                            tidsJC.push_back(tid);
-                            auto occurenceJIt = rule1.occurencesJ.find(tid);
-                            if (occurenceJIt != rule1.occurencesJ.end()) {
-                                if (occurrenceCIt->second.lastItemset <
-                                    occurenceJIt->second.lastItemset) {
-                                    occurencesJC[tid] = occurrenceCIt->second;
+                if (sorted_tids_j.size() < map_c.size()) {
+                    for (int tid : sorted_tids_j) {
+                        auto occurrence_c_it = map_c.find(tid);
+                        if (occurrence_c_it != map_c.end()) {
+                            tids_jc.push_back(tid);
+                            auto occurrence_j_it = rule1.occurrencesJ.find(tid);
+                            if (occurrence_j_it != rule1.occurrencesJ.end()) {
+                                if (occurrence_c_it->second.lastItemset <
+                                    occurrence_j_it->second.lastItemset) {
+                                    occurrences_jc[tid] = occurrence_c_it->second;
                                 } else {
-                                    occurencesJC[tid] = occurenceJIt->second;
+                                    occurrences_jc[tid] = occurrence_j_it->second;
                                 }
                             }
                         }
                     }
                 } else {
-                    for (auto const& entryC : mapC) {
-                        int tid = entryC.first;
-                        if (std::binary_search(sortedTidsJ.begin(), sortedTidsJ.end(), tid)) {
-                            tidsJC.push_back(tid);
-                            auto occurenceJIt = rule1.occurencesJ.find(tid);
-                            if (occurenceJIt != rule1.occurencesJ.end()) {
-                                if (entryC.second.lastItemset < occurenceJIt->second.lastItemset) {
-                                    occurencesJC[tid] = entryC.second;
+                    for (auto const& entry_c : map_c) {
+                        int tid = entry_c.first;
+                        if (std::binary_search(sorted_tids_j.begin(), sorted_tids_j.end(), tid)) {
+                            tids_jc.push_back(tid);
+                            auto occurrence_j_it = rule1.occurrencesJ.find(tid);
+                            if (occurrence_j_it != rule1.occurrencesJ.end()) {
+                                if (entry_c.second.lastItemset <
+                                    occurrence_j_it->second.lastItemset) {
+                                    occurrences_jc[tid] = entry_c.second;
                                 } else {
-                                    occurencesJC[tid] = occurenceJIt->second;
+                                    occurrences_jc[tid] = occurrence_j_it->second;
                                 }
                             }
                         }
                     }
                 }
 
-                std::sort(tidsJC.begin(), tidsJC.end());
-                tidsJC.erase(std::unique(tidsJC.begin(), tidsJC.end()), tidsJC.end());
+                std::sort(tids_jc.begin(), tids_jc.end());
+                tids_jc.erase(std::unique(tids_jc.begin(), tids_jc.end()), tids_jc.end());
 
-                double confI_JC = static_cast<double>(tidsI_JC.size()) / eclass.tidsI.size();
-                std::vector<int> itemsetJC = concatenate(rule1.itemsetJ, c);
+                double conf_i_jc = static_cast<double>(tids_i_jc.size()) / eclass.tidsI.size();
+                std::vector<int> itemset_jc = Concatenate(rule1.itemsetJ, c);
 
-                if (confI_JC >= minConfidence) {
-                    saveRule(tidsI_JC, confI_JC, eclass.itemsetI, itemsetJC);
+                if (conf_i_jc >= minConfidence_) {
+                    SaveRule(tids_i_jc, conf_i_jc, eclass.itemsetI, itemset_jc);
                 }
 
-                RightRule rightRule(itemsetJC, tidsJC, tidsI_JC, occurencesJC);
+                RightRule right_rule(itemset_jc, tids_jc, tids_i_jc, occurrences_jc);
 
-                if (static_cast<int>(itemsetJC.size()) < maxConsequentSize) {
-                    rulesForRecursion.rules.push_back(rightRule);
+                if (static_cast<int>(itemset_jc.size()) < maxConsequentSize_) {
+                    rules_for_recursion.rules.push_back(right_rule);
                 }
 
-                if (static_cast<int>(eclass.itemsetI.size()) < maxAntecedentSize) {
-                    LeftRule leftRule(eclass.itemsetI, eclass.tidsI, tidsI_JC);
-                    store.registerRule(leftRule, itemsetJC, tidsJC, occurencesJC);
+                if (static_cast<int>(eclass.itemsetI.size()) < maxAntecedentSize_) {
+                    LeftRule left_rule(eclass.itemsetI, eclass.tidsI, tids_i_jc);
+                    store_.RegisterRule(left_rule, itemset_jc, tids_jc, occurrences_jc);
                 }
             }
         }
 
-        if (rulesForRecursion.rules.size() > 1) {
-            expandRight(rulesForRecursion);
+        if (rules_for_recursion.rules.size() > 1) {
+            ExpandRight(rules_for_recursion);
         }
     }
 }
 
-void AlgoERMiner::generateMatrix() {
-    for (auto const& sequencePtr : database->getSequences()) {
-        auto const& sequence = *sequencePtr;
-        std::unordered_set<int> alreadyProcessed;
+void AlgoERMiner::GenerateMatrix() {
+    for (auto const& sequence_ptr : database_->GetSequences()) {
+        auto const& sequence = *sequence_ptr;
+        std::unordered_set<int> already_processed;
 
-        for (auto const& itemsetj : sequence.getItemsets()) {
+        for (auto const& itemsetj : sequence.GetItemsets()) {
             for (int itemk : itemsetj) {
-                if (alreadyProcessed.find(itemk) != alreadyProcessed.end() ||
-                    mapItemCount[itemk].size() < static_cast<size_t>(minsuppRelative)) {
+                if (already_processed.find(itemk) != already_processed.end() ||
+                    mapItemCount_[itemk].size() < static_cast<size_t>(minsuppRelative_)) {
                     continue;
                 }
 
-                std::unordered_set<int> alreadyProcessedWithRespectToK;
-                for (auto const& itemsetjj : sequence.getItemsets()) {
+                std::unordered_set<int> already_processed_with_respect_to_k;
+                for (auto const& itemsetjj : sequence.GetItemsets()) {
                     for (int itemkk : itemsetjj) {
                         if (itemkk == itemk ||
-                            alreadyProcessedWithRespectToK.find(itemkk) !=
-                                    alreadyProcessedWithRespectToK.end() ||
-                            mapItemCount[itemkk].size() < static_cast<size_t>(minsuppRelative)) {
+                            already_processed_with_respect_to_k.find(itemkk) !=
+                                    already_processed_with_respect_to_k.end() ||
+                            mapItemCount_[itemkk].size() < static_cast<size_t>(minsuppRelative_)) {
                             continue;
                         }
 
-                        matrix.increaseCountOfPair(itemk, itemkk);
-                        alreadyProcessedWithRespectToK.insert(itemkk);
+                        matrix_.IncreaseCountOfPair(itemk, itemkk);
+                        already_processed_with_respect_to_k.insert(itemkk);
                     }
                 }
-                alreadyProcessed.insert(itemk);
+                already_processed.insert(itemk);
             }
         }
     }
 }
 
-void AlgoERMiner::saveRule(std::vector<int> const& tidsIJ, double confIJ,
+void AlgoERMiner::SaveRule(std::vector<int> const& tidsIJ, double confIJ,
                            std::vector<int> const& itemsetI, std::vector<int> const& itemsetJ) {
-    ruleCount++;
+    ruleCount_++;
 
     Rule rule;
     rule.antecedent = itemsetI;
     rule.consequent = itemsetJ;
     rule.support = tidsIJ.size();
     rule.confidence = confIJ;
-    discoveredRules.push_back(rule);
+    discoveredRules_.push_back(rule);
 
     std::stringstream buffer;
     for (size_t i = 0; i < itemsetI.size(); i++) {
@@ -693,29 +697,29 @@ void AlgoERMiner::saveRule(std::vector<int> const& tidsIJ, double confIJ,
     buffer << " #CONF: " << confIJ;
 
     try {
-        writer << buffer.str() << "\n";
+        writer_ << buffer.str() << "\n";
     } catch (std::exception const& e) {
         std::cerr << "Error writing rule: " << e.what() << std::endl;
     }
 }
 
-std::vector<Rule> AlgoERMiner::getRules() const {
-    return discoveredRules;
+std::vector<Rule> AlgoERMiner::GetRules() const {
+    return discoveredRules_;
 }
 
-void AlgoERMiner::setMaxAntecedentSize(int size) {
-    maxAntecedentSize = size;
+void AlgoERMiner::SetMaxAntecedentSize(int size) {
+    maxAntecedentSize_ = size;
 }
 
-void AlgoERMiner::setMaxConsequentSize(int size) {
-    maxConsequentSize = size;
+void AlgoERMiner::SetMaxConsequentSize(int size) {
+    maxConsequentSize_ = size;
 }
 
-void AlgoERMiner::printStats() const {
+void AlgoERMiner::PrintStats() const {
     std::cout << "=============  ERMiner - STATS ========" << std::endl;
-    std::cout << "Sequential rules count: " << ruleCount << std::endl;
-    std::cout << "Total time: " << (timeEnd - timeStart) << " ms" << std::endl;
-    std::cout << "Candidates pruned: " << candidatePrunedCount << " of " << totalCandidateCount
+    std::cout << "Sequential rules count: " << ruleCount_ << std::endl;
+    std::cout << "Total time: " << (timeEnd_ - timeStart_) << " ms" << std::endl;
+    std::cout << "Candidates pruned: " << candidatePrunedCount_ << " of " << totalCandidateCount_
               << std::endl;
     std::cout << "==========================================" << std::endl;
 }

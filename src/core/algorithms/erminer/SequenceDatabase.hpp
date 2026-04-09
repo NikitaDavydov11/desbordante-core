@@ -8,25 +8,25 @@
 
 class SequenceDatabase {
 private:
-    std::vector<std::unique_ptr<Sequence>> sequences;
+    std::vector<std::unique_ptr<Sequence>> sequences_;
 
 public:
     SequenceDatabase() = default;
 
-    void loadFile(std::string const& path);
+    void LoadFile(std::string const& path);
 
-    void addSequence(std::unique_ptr<Sequence> sequence);
+    void AddSequence(std::unique_ptr<Sequence> sequence);
 
-    int size() const;
+    int Size() const;
 
-    std::vector<std::unique_ptr<Sequence>> const& getSequences() const;
+    std::vector<std::unique_ptr<Sequence>> const& GetSequences() const;
 
-    std::unordered_set<int> getSequenceIDs() const;
+    std::unordered_set<int> GetSequenceIDs() const;
 
-    std::string toString() const;
+    std::string ToString() const;
 
-    void printDatabaseStats() const;
+    void PrintDatabaseStats() const;
 
 private:
-    void addSequence(std::vector<std::string> const& tokens);
+    void AddSequence(std::vector<std::string> const& tokens);
 };

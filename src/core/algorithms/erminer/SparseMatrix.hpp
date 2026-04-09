@@ -7,9 +7,9 @@ public:
 
     SparseMatrix() = default;
 
-    void increaseCountOfPair(int i, int j);
+    void IncreaseCountOfPair(int i, int j);
 
-    int getCount(int i, int j) const;
+    int GetCount(int i, int j) const;
 
-    std::unordered_map<int, std::unordered_map<int, int>> const& getMatrix() const;
+    std::unordered_map<int, std::unordered_map<int, int>> const& GetMatrix() const;
 };

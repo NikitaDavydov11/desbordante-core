@@ -10,9 +10,9 @@ public:
     std::vector<int> itemsetJ;
     std::vector<int> tidsJ;
     std::vector<int> tidsIJ;
-    std::unordered_map<int, Occurence> occurencesJ;
+    std::unordered_map<int, Occurrence> occurrencesJ;
 
     RightRule(std::vector<int> itemsetJ, std::vector<int> tidsJ, std::vector<int> tidsIJ,
-              std::unordered_map<int, Occurence> occurencesJ);
-    std::string toString() const;
+              std::unordered_map<int, Occurrence> occurrencesJ);
+    std::string ToString() const;
 };

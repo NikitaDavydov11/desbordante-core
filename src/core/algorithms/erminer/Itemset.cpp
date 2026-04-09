@@ -12,61 +12,61 @@ Itemset::Itemset(std::vector<int> items) : itemset(std::move(items)) {
     std::sort(itemset.begin(), itemset.end());
 }
 
-int Itemset::getAbsoluteSupport() const {
+int Itemset::GetAbsoluteSupport() const {
     return static_cast<int>(transactionsIds.size());
 }
 
-std::vector<int> Itemset::getItems() const {
+std::vector<int> Itemset::GetItems() const {
     return itemset;
 }
 
-int Itemset::get(int index) const {
+int Itemset::Get(int index) const {
     return itemset[index];
 }
 
-void Itemset::setTIDs(std::vector<int> const& listTransactionIds) {
+void Itemset::SetTiDs(std::vector<int> const& listTransactionIds) {
     transactionsIds = listTransactionIds;
     std::sort(transactionsIds.begin(), transactionsIds.end());
     transactionsIds.erase(std::unique(transactionsIds.begin(), transactionsIds.end()),
                           transactionsIds.end());
 }
 
-int Itemset::size() const {
+int Itemset::Size() const {
     return static_cast<int>(itemset.size());
 }
 
-std::vector<int> Itemset::getTransactionsIds() const {
+std::vector<int> Itemset::GetTransactionsIds() const {
     return transactionsIds;
 }
 
-Itemset Itemset::cloneItemSetMinusAnItemset(Itemset const& itemsetToNotKeep) const {
-    std::vector<int> newItemset;
+Itemset Itemset::CloneItemSetMinusAnItemset(Itemset const& itemsetToNotKeep) const {
+    std::vector<int> new_itemset;
 
     for (int item : itemset) {
         bool found = false;
-        for (int excludeItem : itemsetToNotKeep.itemset) {
-            if (item == excludeItem) {
+        for (int exclude_item : itemsetToNotKeep.itemset) {
+            if (item == exclude_item) {
                 found = true;
                 break;
             }
         }
 
         if (!found) {
-            newItemset.push_back(item);
+            new_itemset.push_back(item);
         }
     }
 
-    return Itemset(newItemset);
+    return Itemset(new_itemset);
 }
 
-Itemset Itemset::cloneItemSetMinusOneItem(int itemToRemove) const {
-    std::vector<int> newItemset;
+Itemset Itemset::CloneItemSetMinusOneItem(int itemToRemove) const {
+    std::vector<int> new_itemset;
 
     for (int item : itemset) {
         if (item != itemToRemove) {
-            newItemset.push_back(item);
+            new_itemset.push_back(item);
         }
     }
 
-    return Itemset(newItemset);
+    return Itemset(new_itemset);
 }

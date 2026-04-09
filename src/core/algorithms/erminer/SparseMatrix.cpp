@@ -1,6 +1,6 @@
 #include "SparseMatrix.hpp"
 
-void SparseMatrix::increaseCountOfPair(int i, int j) {
+void SparseMatrix::IncreaseCountOfPair(int i, int j) {
     if (i < j) {
         return;
     }
@@ -8,21 +8,21 @@ void SparseMatrix::increaseCountOfPair(int i, int j) {
     matrix[i][j]++;
 }
 
-int SparseMatrix::getCount(int i, int j) const {
-    auto outerIt = matrix.find(i);
-    if (outerIt == matrix.end()) {
+int SparseMatrix::GetCount(int i, int j) const {
+    auto outer_it = matrix.find(i);
+    if (outer_it == matrix.end()) {
         return 0;
     }
 
-    auto const& innerMap = outerIt->second;
-    auto innerIt = innerMap.find(j);
-    if (innerIt == innerMap.end()) {
+    auto const& inner_map = outer_it->second;
+    auto inner_it = inner_map.find(j);
+    if (inner_it == inner_map.end()) {
         return 0;
     }
 
-    return innerIt->second;
+    return inner_it->second;
 }
 
-std::unordered_map<int, std::unordered_map<int, int>> const& SparseMatrix::getMatrix() const {
+std::unordered_map<int, std::unordered_map<int, int>> const& SparseMatrix::GetMatrix() const {
     return matrix;
 }

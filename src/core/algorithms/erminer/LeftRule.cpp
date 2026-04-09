@@ -13,7 +13,7 @@ LeftRule::LeftRule(std::vector<int> itemsetI, std::vector<int> tidsI, std::vecto
     this->tidsIJ.erase(std::unique(this->tidsIJ.begin(), this->tidsIJ.end()), this->tidsIJ.end());
 }
 
-std::string LeftRule::toString() const {
+std::string LeftRule::ToString() const {
     std::stringstream ss;
 
     ss << "[";

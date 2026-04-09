@@ -5,11 +5,11 @@
 #include <string>
 
 RightRule::RightRule(std::vector<int> itemsetJ, std::vector<int> tidsJ, std::vector<int> tidsIJ,
-                     std::unordered_map<int, Occurence> occurencesJ)
+                     std::unordered_map<int, Occurrence> occurrencesJ)
     : itemsetJ(std::move(itemsetJ)),
       tidsJ(std::move(tidsJ)),
       tidsIJ(std::move(tidsIJ)),
-      occurencesJ(std::move(occurencesJ)) {
+      occurrencesJ(std::move(occurrencesJ)) {
     std::sort(this->tidsJ.begin(), this->tidsJ.end());
     this->tidsJ.erase(std::unique(this->tidsJ.begin(), this->tidsJ.end()), this->tidsJ.end());
 
@@ -17,7 +17,7 @@ RightRule::RightRule(std::vector<int> itemsetJ, std::vector<int> tidsJ, std::vec
     this->tidsIJ.erase(std::unique(this->tidsIJ.begin(), this->tidsIJ.end()), this->tidsIJ.end());
 }
 
-std::string RightRule::toString() const {
+std::string RightRule::ToString() const {
     std::stringstream ss;
 
     ss << " ==> [";

@@ -5,13 +5,15 @@
 #include <string>
 
 LeftEquivalenceClass::LeftEquivalenceClass(std::vector<int> itemsetJ, std::vector<int> tidsJ,
-                                           std::unordered_map<int, Occurence> occurencesJ)
-    : itemsetJ(std::move(itemsetJ)), tidsJ(std::move(tidsJ)), occurencesJ(std::move(occurencesJ)) {
+                                           std::unordered_map<int, Occurrence> occurrencesJ)
+    : itemsetJ(std::move(itemsetJ)),
+      tidsJ(std::move(tidsJ)),
+      occurrencesJ(std::move(occurrencesJ)) {
     std::sort(this->tidsJ.begin(), this->tidsJ.end());
     this->tidsJ.erase(std::unique(this->tidsJ.begin(), this->tidsJ.end()), this->tidsJ.end());
 }
 
-std::string LeftEquivalenceClass::toString() const {
+std::string LeftEquivalenceClass::ToString() const {
     std::stringstream ss;
 
     ss << "EQ:[";
@@ -26,10 +28,10 @@ std::string LeftEquivalenceClass::toString() const {
     return ss.str();
 }
 
-bool LeftEquivalenceClass::equals(LeftEquivalenceClass const& other) const {
+bool LeftEquivalenceClass::Equals(LeftEquivalenceClass const& other) const {
     return itemsetJ == other.itemsetJ;
 }
 
 bool LeftEquivalenceClass::operator==(LeftEquivalenceClass const& other) const {
-    return equals(other);
+    return Equals(other);
 }

@@ -11,18 +11,18 @@ public:
     Itemset(int item);
     Itemset(std::vector<int> items);
 
-    int getAbsoluteSupport() const;
+    int GetAbsoluteSupport() const;
 
-    std::vector<int> getItems() const;
+    std::vector<int> GetItems() const;
 
-    int get(int index) const;
+    int Get(int index) const;
 
-    void setTIDs(std::vector<int> const& listTransactionIds);
+    void SetTiDs(std::vector<int> const& listTransactionIds);
 
-    int size() const;
+    int Size() const;
 
-    std::vector<int> getTransactionsIds() const;
+    std::vector<int> GetTransactionsIds() const;
 
-    Itemset cloneItemSetMinusAnItemset(Itemset const& itemsetToNotKeep) const;
-    Itemset cloneItemSetMinusOneItem(int itemToRemove) const;
+    Itemset CloneItemSetMinusAnItemset(Itemset const& itemsetToNotKeep) const;
+    Itemset CloneItemSetMinusOneItem(int itemToRemove) const;
 };

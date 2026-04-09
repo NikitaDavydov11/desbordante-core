@@ -10,5 +10,5 @@ public:
 
     LeftRule(std::vector<int> itemsetI, std::vector<int> tidsI, std::vector<int> tidsIJ);
 
-    std::string toString() const;
+    std::string ToString() const;
 };

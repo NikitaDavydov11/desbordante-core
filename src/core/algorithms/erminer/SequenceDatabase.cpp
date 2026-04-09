@@ -5,7 +5,7 @@
 #include <iostream>
 #include <sstream>
 
-void SequenceDatabase::loadFile(std::string const& path) {
+void SequenceDatabase::LoadFile(std::string const& path) {
     std::ifstream file(path);
     if (!file.is_open()) {
         throw std::runtime_error("Cannot open file: " + path);
@@ -26,13 +26,13 @@ void SequenceDatabase::loadFile(std::string const& path) {
         }
 
         if (!tokens.empty()) {
-            addSequence(tokens);
+            AddSequence(tokens);
         }
     }
 }
 
-void SequenceDatabase::addSequence(std::vector<std::string> const& tokens) {
-    auto sequence = std::make_unique<Sequence>(static_cast<int>(sequences.size()));
+void SequenceDatabase::AddSequence(std::vector<std::string> const& tokens) {
+    auto sequence = std::make_unique<Sequence>(static_cast<int>(sequences_.size()));
     std::vector<int> itemset;
 
     for (auto const& token : tokens) {
@@ -40,14 +40,14 @@ void SequenceDatabase::addSequence(std::vector<std::string> const& tokens) {
             continue;
         } else if (token == "-1") {
             if (!itemset.empty()) {
-                sequence->addItemset(itemset);
+                sequence->AddItemset(itemset);
                 itemset.clear();
             }
         } else if (token == "-2") {
             if (!itemset.empty()) {
-                sequence->addItemset(itemset);
+                sequence->AddItemset(itemset);
             }
-            sequences.push_back(std::move(sequence));
+            sequences_.push_back(std::move(sequence));
             return;
         } else {
             try {
@@ -59,53 +59,53 @@ void SequenceDatabase::addSequence(std::vector<std::string> const& tokens) {
     }
 
     if (!itemset.empty()) {
-        sequence->addItemset(itemset);
+        sequence->AddItemset(itemset);
     }
-    sequences.push_back(std::move(sequence));
+    sequences_.push_back(std::move(sequence));
 }
 
-void SequenceDatabase::addSequence(std::unique_ptr<Sequence> sequence) {
-    sequences.push_back(std::move(sequence));
+void SequenceDatabase::AddSequence(std::unique_ptr<Sequence> sequence) {
+    sequences_.push_back(std::move(sequence));
 }
 
-int SequenceDatabase::size() const {
-    return static_cast<int>(sequences.size());
+int SequenceDatabase::Size() const {
+    return static_cast<int>(sequences_.size());
 }
 
-std::vector<std::unique_ptr<Sequence>> const& SequenceDatabase::getSequences() const {
-    return sequences;
+std::vector<std::unique_ptr<Sequence>> const& SequenceDatabase::GetSequences() const {
+    return sequences_;
 }
 
-std::unordered_set<int> SequenceDatabase::getSequenceIDs() const {
+std::unordered_set<int> SequenceDatabase::GetSequenceIDs() const {
     std::unordered_set<int> ids;
-    for (auto const& seq : sequences) {
-        ids.insert(seq->getId());
+    for (auto const& seq : sequences_) {
+        ids.insert(seq->GetId());
     }
     return ids;
 }
 
-std::string SequenceDatabase::toString() const {
+std::string SequenceDatabase::ToString() const {
     std::stringstream ss;
-    for (auto const& sequence : sequences) {
-        ss << sequence->getId() << ":  " << sequence->toString() << "\n";
+    for (auto const& sequence : sequences_) {
+        ss << sequence->GetId() << ":  " << sequence->ToString() << "\n";
     }
     return ss.str();
 }
 
-void SequenceDatabase::printDatabaseStats() const {
+void SequenceDatabase::PrintDatabaseStats() const {
     std::cout << "============  STATS ==========\n";
-    std::cout << "Number of sequences : " << sequences.size() << "\n";
+    std::cout << "Number of sequences : " << sequences_.size() << "\n";
 
-    if (sequences.empty()) {
+    if (sequences_.empty()) {
         std::cout << "mean size: 0\n";
         return;
     }
 
-    long totalSize = 0;
-    for (auto const& seq : sequences) {
-        totalSize += seq->size();
+    long total_size = 0;
+    for (auto const& seq : sequences_) {
+        total_size += seq->Size();
     }
 
-    double meanSize = static_cast<double>(totalSize) / sequences.size();
-    std::cout << "mean size: " << meanSize << "\n";
+    double mean_size = static_cast<double>(total_size) / sequences_.size();
+    std::cout << "mean size: " << mean_size << "\n";
 }
