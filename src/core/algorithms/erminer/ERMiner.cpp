@@ -165,7 +165,7 @@ void AlgoERMiner::runAlgorithm(std::string const& input, std::string const& outp
         generateMatrix();
     }
 
-    std::unordered_map<int, LeftEquivalenceClass> mapEclassLeft;
+    std::unordered_map<int, LeftEquivalenceClass> map_eclass_left;
     std::unordered_map<int, RightEquivalenceClass> mapEclassRight;
 
     for (auto const& entry : matrix.matrix) {
