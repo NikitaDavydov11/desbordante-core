@@ -1,4 +1,5 @@
 #include "Itemset.hpp"
+
 #include <algorithm>
 
 Itemset::Itemset() = default;
@@ -23,10 +24,11 @@ int Itemset::get(int index) const {
     return itemset[index];
 }
 
-void Itemset::setTIDs(const std::vector<int>& listTransactionIds) {
+void Itemset::setTIDs(std::vector<int> const& listTransactionIds) {
     transactionsIds = listTransactionIds;
     std::sort(transactionsIds.begin(), transactionsIds.end());
-    transactionsIds.erase(std::unique(transactionsIds.begin(), transactionsIds.end()), transactionsIds.end());
+    transactionsIds.erase(std::unique(transactionsIds.begin(), transactionsIds.end()),
+                          transactionsIds.end());
 }
 
 int Itemset::size() const {
@@ -37,9 +39,9 @@ std::vector<int> Itemset::getTransactionsIds() const {
     return transactionsIds;
 }
 
-Itemset Itemset::cloneItemSetMinusAnItemset(const Itemset& itemsetToNotKeep) const {
+Itemset Itemset::cloneItemSetMinusAnItemset(Itemset const& itemsetToNotKeep) const {
     std::vector<int> newItemset;
-    
+
     for (int item : itemset) {
         bool found = false;
         for (int excludeItem : itemsetToNotKeep.itemset) {
@@ -48,23 +50,23 @@ Itemset Itemset::cloneItemSetMinusAnItemset(const Itemset& itemsetToNotKeep) con
                 break;
             }
         }
-        
+
         if (!found) {
             newItemset.push_back(item);
         }
     }
-    
+
     return Itemset(newItemset);
 }
 
 Itemset Itemset::cloneItemSetMinusOneItem(int itemToRemove) const {
     std::vector<int> newItemset;
-    
+
     for (int item : itemset) {
         if (item != itemToRemove) {
             newItemset.push_back(item);
         }
     }
-    
+
     return Itemset(newItemset);
 }
